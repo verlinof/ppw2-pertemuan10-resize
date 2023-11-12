@@ -3,9 +3,6 @@
 @section('root')
 @include('components.navbar')
 
-<div class="p-8 md:p-6 lg:p-5">
-
-</div>
 @include('components.hero')
 {{-- START About Me --}}
 <div class="w-full bg-gray-100">

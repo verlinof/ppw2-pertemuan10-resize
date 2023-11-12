@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -44,7 +46,32 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            "title" => "required|max:255",
+            "description" => "required",
+            "image" => "required|image|max:3999"
+        ]);
+
+        if($request->hasFile('image')){
+            $filenameWithExt = $request->file('image')->getClientOriginalName();
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            $extension = $request->file('image')->getClientOriginalExtension();
+            $filenameSimpan = $filename . "_" . time() . "." . $extension;
+            $image = Image::make($request->file('image'));
+            $image->save('storage/posts/image/'.$filenameSimpan);
+
+            $pathSquare = ('storage/posts/image_square/'.$filenameSimpan);
+            $image->fit(500,500)->save($pathSquare);
+            
+            $request["image"] = $filenameSimpan;
+            Post::create([
+                "title" => $request['title'],
+                "description" => $request['description'],
+                "image" => $filenameSimpan,
+            ]);
+        }
+
+        return redirect('posts');
     }
 
     /**
@@ -58,24 +85,75 @@ class PostController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Post $post)
+    public function edit($id)
     {
-        //
+        if(Auth::check()){
+            $post = Post::findOrFail($id);
+    
+            return view("post.edit", [
+                "post" => $post,
+                "page" => "posts"
+            ]);
+        }
+
+        return redirect('/login');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(Request $request, $id)
     {
-        //
+        $post = Post::findOrFail($id);
+
+        $request->validate([
+            "title" => "required|max:255",
+            "description" => "required",
+            "image" => "image|max:3999"
+        ]);
+
+        if($request->hasFile("image")){
+            $filenameWithExt = $request->file('image')->getClientOriginalName();
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            $extension = $request->file('image')->getClientOriginalExtension();
+            $filenameSimpan = $filename . "_" . time() . "." . $extension;
+            $image = Image::make($request->file('image'));
+            $image->save('storage/posts/image/'.$filenameSimpan);
+
+            $pathSquare = ('storage/posts/image_square/'.$filenameSimpan);
+            $image->fit(500,500)->save($pathSquare);
+
+            File::delete("storage/posts/image/".$post->image);
+            File::delete("storage/posts/image_square/".$post->image);
+
+            $post->update([
+                "title" => $request["title"],
+                "description" => $request["description"],
+                "image" => $filenameSimpan
+            ]);
+        }
+        else{
+            $post->update([
+                "title" => $request["title"],
+                "description" => $request["description"],
+            ]);
+        }
+
+        return redirect("/posts");
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy($id)
     {
-        //
+        $post = Post::findOrFail($id);
+        
+        File::delete("storage/posts/image/".$post->image);
+        File::delete("storage/posts/image_square/".$post->image);
+
+        $post->delete();
+
+        return redirect("/posts");
     }
 }

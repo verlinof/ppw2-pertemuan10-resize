@@ -3,7 +3,7 @@
 @section('root')
 @include('components.navbar')
 
-<div class="w-full mt-20 flex justify-center">
+<div class="w-full mt-10 flex justify-center">
     <div class="flex flex-col items-center pb-10">
         <img class="w-28 h-28 mb-3 rounded-full shadow-lg" src="{{ asset('storage/photos_square/'.$user->photo) }}" alt="Profile Picture">
         <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ $user->username }}</h5>

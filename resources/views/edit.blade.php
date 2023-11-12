@@ -2,7 +2,7 @@
 
 @section('root')
 @include('components.navbar')
-<div class="w-full mt-20 flex justify-center">
+<div class="w-full flex justify-center">
     <div class="flex items-center md:w-[400px] lg:w-[500px] h-max p-8 md:p-9 lg:p-10 bg-white rounded-xl">
         <div class="w-full">
             <p class="top-0 text-center text-xl md:text-2xl lg:text-3xl font-bold mb-6">Edit Profile</p>
